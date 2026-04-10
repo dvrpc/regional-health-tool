@@ -1,4 +1,4 @@
-// import DVRPCMini from '@/assets/dvrpc-mini.svg?react'
+import DVRPCMini from '@/assets/dvrpc-mini.svg?react';
 
 export default function Header() {
   return (
@@ -8,9 +8,7 @@ export default function Header() {
         target="_blank"
         aria-label="DVRPC Main Website"
       >
-        <div className="mt-3 h-12 text-dvrpc-blue-3">
-          {/* <DVRPCMini /> */}
-        </div>
+        <DVRPCMini className="h-12 mt-3 w-auto" />
       </a>
       <h1 className="text-3xl font-bold border-l-3 pl-4">
         Regional Health Tool

@@ -1,14 +1,17 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import path from 'path';
 import svgr from 'vite-plugin-svgr';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), svgr({
-    include: '**/*.svg',
-  })],
+  plugins: [react(), tailwindcss(), svgr()],
+  base:
+    process.env.NODE_ENV === 'production'
+      ? '/webmaps/regional-health-tool'
+      : '/',
+
   resolve: {
     alias: {
       '@components': path.resolve(__dirname, './src/components'),
@@ -17,7 +20,6 @@ export default defineConfig({
       '@consts': path.resolve(__dirname, './src/consts.ts'),
       '@assets': path.resolve(__dirname, './src/assets'),
       '@': path.resolve(__dirname, './src'),
-
     },
   },
-})
+});
