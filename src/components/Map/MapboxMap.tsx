@@ -40,7 +40,7 @@ interface Props {
   selectedIndicator: HealthPropertyKeys;
   compareMode: CompareMode;
 }
-export default function Map(props: Props) {
+export default function MapboxMap(props: Props) {
   const {
     setSelectedProperties,
     selectedIndicator,

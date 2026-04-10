@@ -1,7 +1,7 @@
 import ContentPanel from '@components/ContentPanel/ContentPanel';
 import LandingContent from '@components/ContentPanel/LandingContent';
 import Header from '@components/Layout/Header';
-import Map from '@components/Map/Map';
+import MapboxMap from '@components/Map/MapboxMap';
 import {
   type CompareMode,
   type AllProperties,
@@ -23,7 +23,7 @@ function App() {
       <main className="flex flex-1 flex-col min-h-0 overflow-hidden">
         <div className="flex flex-1 min-h-0">
           <div className="w-3/5 h-full min-h-0">
-            <Map
+            <MapboxMap
               setSelectedProperties={setSelectedProperties}
               selectedProperties={selectedProperties}
               selectedIndicator={selectedIndicator}
