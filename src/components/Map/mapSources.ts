@@ -12,7 +12,8 @@ const sources: SourceMap = {
   healthIndicators: {
     type: 'vector',
     url: 'https://tiles.dvrpc.org/data/demographics/regional_health_indicators',
-  }
+    promoteId: 'geoid',
+  },
 };
 
 export default sources;

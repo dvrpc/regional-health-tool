@@ -48,7 +48,6 @@ export class CustomNavigationControl extends mapboxgl.NavigationControl {
 
   private _fitToExtent(): void {
     this._map?.fitBounds(this._bounds, {
-      padding: 40,
       duration: 1200,
       easing: (t) => t * (2 - t),
     });
