@@ -1,4 +1,4 @@
-import type { AllProperties, HealthPropertyKeys } from '@types';
+import type { HealthDataProperties, HealthPropertyKeys, TitleVIProperties, TitleViPropertyKeys } from '@types';
 
 export function themeColor(name: string): string {
   return getComputedStyle(document.documentElement)
@@ -16,12 +16,22 @@ export function formatCensusTractId(tractId: string) {
 }
 
 export function getIndicatorProps(
-  properties: AllProperties,
+  properties: HealthDataProperties,
   key: HealthPropertyKeys
 ) {
   return {
-    regionPercentile: properties[`${key}_pct_reg` as keyof AllProperties],
-    countyPercentile: properties[`${key}_pct_cty` as keyof AllProperties],
-    value: properties[`${key}_prv` as keyof AllProperties],
+    regionPercentile: properties[`${key}_pct_reg`],
+    countyPercentile: properties[`${key}_pct_cty`],
+    value: properties[`${key}_prv`],
+  };
+}
+
+export function getTitleViIndicatorProps(
+  properties: TitleVIProperties,
+  key: TitleViPropertyKeys
+) {
+  return {
+    regionPercentile: properties[`${key}_pctile`],
+    value: properties[`${key}_pct`],
   };
 }

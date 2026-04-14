@@ -6,11 +6,12 @@ import Legend from './Legend';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import type {
-  AllProperties,
+  HealthDataProperties,
   CompareMode,
-  HealthPropertyKeys,
   HealthSuffix,
   MouseEvent,
+  TitleVIProperties,
+  IndicatorKeys,
 } from '@types';
 import { CustomNavigationControl } from './CustomNavigationControl';
 import {
@@ -27,193 +28,166 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN as string;
 const geocoder = new MapboxGeocoder({
   accessToken: mapboxgl.accessToken,
   placeholder: 'Search to location',
-  bbox: [
-    -76.09405517578125, 39.49211914385648, -74.32525634765625,
-    40.614734298694216,
-  ],
+  bbox: [-76.09405517578125, 39.49211914385648, -74.32525634765625, 40.614734298694216],
   marker: false,
 });
 
 interface Props {
-  setSelectedProperties: React.Dispatch<React.SetStateAction<AllProperties>>;
-  selectedProperties: AllProperties;
-  selectedIndicator: HealthPropertyKeys;
+  selectedProperties: HealthDataProperties | TitleVIProperties;
+  selectedIndicator: IndicatorKeys;
   compareMode: CompareMode;
+  setSelectedIndicator: React.Dispatch<React.SetStateAction<IndicatorKeys>>;
+  setSelectedTitleViProperties: React.Dispatch<React.SetStateAction<TitleVIProperties>>;
+  setSelectedHealthProperties: React.Dispatch<React.SetStateAction<HealthDataProperties>>;
 }
-export default function MapboxMap(props: Props) {
-  const {
-    setSelectedProperties,
-    selectedIndicator,
-    compareMode,
-    selectedProperties,
-  } = props;
-  const mapContainer = useRef<HTMLDivElement | null>(null);
+
+export default function MapboxMap({
+  selectedIndicator,
+  compareMode,
+  selectedProperties,
+  setSelectedHealthProperties,
+  setSelectedTitleViProperties,
+}: Props) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const hoverIdRef = useRef<string | null>(null);
   const selectIdRef = useRef<string | null>(null);
-  const compareModeRef = useRef<CompareMode>(compareMode);
+
+  const compareModeRef = useRef(compareMode);
+  const fipsRef = useRef('');
 
   const fips = String(selectedProperties.geoid).substring(0, 5);
   const countyName = countyFipsMap[fips as keyof typeof countyFipsMap];
 
-  function setHoverId(val: string | null) {
-    hoverIdRef.current = val;
-  }
+  useEffect(() => { compareModeRef.current = compareMode; }, [compareMode]);
+  useEffect(() => { fipsRef.current = fips; }, [fips]);
 
-  function setSelectId(val: string | null) {
-    selectIdRef.current = val;
-  }
 
-  function removeSelection() {
+  const setFeatureState = (id: string, state: Record<string, boolean>) => {
+    mapRef.current?.setFeatureState(
+      { source: 'healthIndicators', sourceLayer: 'regional_health_indicators', id },
+      state
+    );
+  };
+
+  const clearSelection = () => {
     if (!mapRef.current || !selectIdRef.current) return;
     mapRef.current.removeFeatureState({
       source: 'healthIndicators',
       sourceLayer: 'regional_health_indicators',
     });
-  }
-
-  const healthFeatureState = (id: string, state: Record<string, boolean>) => {
-    mapRef.current?.setFeatureState(
-      {
-        source: 'healthIndicators',
-        sourceLayer: 'regional_health_indicators',
-        id,
-      },
-      state
-    );
   };
 
-  const centerMap = () => {
-    const map = mapRef.current;
-    if (!map) return;
-    map.fitBounds(INITIAL_BOUNDS);
+  const fitInitial = () => mapRef.current?.fitBounds(INITIAL_BOUNDS);
+
+  const fitCounty = (fipsCode = fipsRef.current) => {
+    const bounds = countyBounds[fipsCode];
+    if (bounds) mapRef.current?.fitBounds(bounds, { padding: 50 });
   };
 
-  const centerOnCounty = () => {
-    const map = mapRef.current;
-    if (!map || !selectIdRef.current) return;
 
-    const fips = selectIdRef.current.substring(0, 5);
-    const bounds = countyBounds[fips];
-    if (bounds) map.fitBounds(bounds, { padding: 50 });
-  };
-
-  const hoverGeoFill = (e: MouseEvent) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (!e.features || !mapRef.current) return;
     mapRef.current.getCanvas().style.cursor = 'pointer';
-    if (hoverIdRef.current)
-      healthFeatureState(hoverIdRef.current, { hover: false });
-    const id = e.features[0].id + '';
-    setHoverId(id);
-    healthFeatureState(id, { hover: true });
+    if (hoverIdRef.current) setFeatureState(hoverIdRef.current, { hover: false });
+    const id = String(e.features[0].id);
+    hoverIdRef.current = id;
+    setFeatureState(id, { hover: true });
   };
 
-  const leaveGeoFill = () => {
+  const handleMouseLeave = () => {
     if (!mapRef.current) return;
     mapRef.current.getCanvas().style.cursor = '';
-    if (hoverIdRef.current)
-      healthFeatureState(hoverIdRef.current, { hover: false });
-    setHoverId(null);
+    if (hoverIdRef.current) setFeatureState(hoverIdRef.current, { hover: false });
+    hoverIdRef.current = null;
   };
 
   const handleClick = (e: MouseEvent) => {
     if (!mapRef.current || !e.features) return;
-    if (selectIdRef.current) removeSelection();
+    clearSelection();
 
-    const id = e.features[0].id + '';
-    setSelectId(id);
-    setSelectedProperties(e.features[0].properties as AllProperties);
-    healthFeatureState(id, { selected: true });
+    const id = String(e.features[0].id);
+    selectIdRef.current = id;
+    setSelectedTitleViProperties(e.features[0].properties as TitleVIProperties);
+    setSelectedHealthProperties(e.features[1].properties as HealthDataProperties);
+    setFeatureState(id, { selected: true });
 
-    if (compareModeRef.current == 'County') {
-      centerOnCounty();
+    if (compareModeRef.current === 'County') {
+      fitCounty(String(id).substring(0, 5));
     }
   };
+
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    const initialZoom = 12;
-
-    const map = (mapRef.current = new mapboxgl.Map({
+    const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/ckirby98/cmndm12qu000m01qlb48t3970',
-
-      zoom: initialZoom,
-      trackResize: true,
       bounds: INITIAL_BOUNDS,
-    }));
-
-    map.on('load', () => {
-      const layers = baseLayers;
-
-      map.resize();
-
-      map.addControl(geocoder, 'top-right');
-      map.addControl(new CustomNavigationControl({}, INITIAL_BOUNDS));
-
-      for (const source in sources) map.addSource(source, sources[source]);
-      for (const layer in layers) {
-        map.addLayer(layers[layer]);
-      }
+      trackResize: true,
     });
+
     mapRef.current = map;
 
-    map.on('mousemove', ['health-indicators'], hoverGeoFill);
-    map.on('mouseleave', ['health-indicators'], leaveGeoFill);
-    map.on('click', ['health-indicators'], handleClick);
+    map.on('load', () => {
+      map.resize();
+      map.addControl(geocoder, 'top-right');
+      map.addControl(new CustomNavigationControl({}, INITIAL_BOUNDS));
+      Object.entries(sources).forEach(([id, src]) => map.addSource(id, src));
+      Object.values(baseLayers).forEach((layer) => map.addLayer(layer));
+    });
 
-    return () => {
-      map.remove();
-    };
+    map.on('mousemove', ['health-indicators'], handleMouseMove);
+    map.on('mouseleave', ['health-indicators'], handleMouseLeave);
+    map.on('click', ['health-indicators', 'titlevi-indicators'], handleClick);
+
+    return () => map.remove();
   }, []);
 
-  useEffect(() => {
-    if (!mapRef.current || !mapRef.current.isStyleLoaded()) return;
-    mapRef.current.setPaintProperty(
-      'health-indicators',
-      'fill-color',
-      buildFillColor(selectedIndicator, '_pct_reg')
-    );
-  }, [selectedIndicator]);
 
   useEffect(() => {
-    if (!mapRef.current || !mapRef.current.isStyleLoaded()) return;
+    const map = mapRef.current;
+    if (!map?.isStyleLoaded()) return;
 
-    const suffix: HealthSuffix =
-      compareMode == 'Region' ? '_pct_reg' : '_pct_cty';
+    const isTitleVI = selectedIndicator.length <= 2;
+    const isCountyMode = compareMode === 'County';
 
-    const opacityProperty: DataDrivenPropertyValueSpecification<number> =
-      compareMode === 'County'
+    const healthSuffix: HealthSuffix = isCountyMode ? '_pct_cty' : '_pct_reg';
+    const healthOpacity: DataDrivenPropertyValueSpecification<number> =
+      !isTitleVI && isCountyMode
         ? ['case', ['==', ['slice', ['get', 'geoid'], 0, 5], fips], 0.75, 0]
-        : 0.75;
+        : !isTitleVI
+          ? 0.75
+          : 0;
 
-    mapRef.current.setPaintProperty(
-      'health-indicators',
-      'fill-color',
-      buildFillColor(selectedIndicator, suffix)
+    map.setPaintProperty('health-indicators', 'fill-color',
+      isTitleVI ? '#fff' : buildFillColor(selectedIndicator, healthSuffix)
     );
+    map.setPaintProperty('health-indicators', 'fill-opacity', healthOpacity);
 
-    mapRef.current.setPaintProperty(
-      'health-indicators',
-      'fill-opacity',
-      opacityProperty
+    // TitleVI layer — never shown in County mode
+    map.setPaintProperty('titlevi-indicators', 'fill-color',
+      isTitleVI && !isCountyMode ? buildFillColor(selectedIndicator, '_pctile') : '#fff'
     );
-  }, [compareMode, fips]);
+    map.setPaintProperty('titlevi-indicators', 'fill-opacity',
+      isTitleVI && !isCountyMode ? 0.75 : 0
+    );
+  }, [selectedIndicator, compareMode, fips]);
+
 
   useEffect(() => {
-    compareModeRef.current = compareMode;
-    if (compareMode == 'County') {
-      centerOnCounty();
+    if (compareMode === 'County') {
+      fitCounty();
     } else {
-      centerMap();
+      fitInitial();
     }
   }, [compareMode]);
 
+  const mapContainer = useRef<HTMLDivElement | null>(null);
+
   return (
     <div className="relative w-full h-full">
-      <div ref={mapContainer} className="w-full h-full"></div>
-
+      <div ref={mapContainer} className="w-full h-full" />
       <Legend
         indicatorLabel={indicatorPropertyLabelMap[selectedIndicator]}
         compareMode={compareMode}

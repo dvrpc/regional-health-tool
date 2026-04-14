@@ -36,6 +36,16 @@ const baseLayers: LayerMap = {
       'fill-opacity': 0.75,
     }
   },
+  titleViIndicators: {
+    id: 'titlevi-indicators',
+    type: 'fill',
+    source: 'titleViIndicators',
+    'source-layer': 'title_vi_indicators_latest',
+    paint: {
+      'fill-color': '#fff',
+      'fill-opacity': 0,
+    }
+  },
   tractOutline: {
     id: 'tract-outline',
     type: 'line',

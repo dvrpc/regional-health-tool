@@ -1,4 +1,4 @@
-import type { HealthPropertyKeys } from '@types';
+import type { HealthPropertyKeys, IndicatorKeys, TitleViPropertyKeys } from '@types';
 import mapboxgl, { type LngLatBoundsLike } from 'mapbox-gl';
 
 export const INITIAL_BOUNDS = new mapboxgl.LngLatBounds(
@@ -57,7 +57,7 @@ export const countyBounds: Record<string, LngLatBoundsLike> = {
   ],
 };
 
-export const indicatorPropertyLabelMap: Record<HealthPropertyKeys, string> = {
+export const indicatorPropertyLabelMap: Record<IndicatorKeys, string> = {
   access2: 'Uninsured Adults',
   arthritis: 'Arthritis',
   binge: 'Binge Drinking',
@@ -104,9 +104,18 @@ export const indicatorPropertyLabelMap: Record<HealthPropertyKeys, string> = {
   teethlost: 'Teeth Lost',
   unemp: 'Unemployed',
   vision: 'Vision Impairment',
+  d: 'People with Disabilities',
+  em: 'Ethnic Minority',
+  f: 'Female',
+  fb: 'Foreign-Born',
+  le: 'Limited English Proficiency (LEP)',
+  li: 'Low Income',
+  oa: 'Older Adults',
+  rm: 'People of Color',
+  y: 'Youth'
 };
 
-export const activeKeys: HealthPropertyKeys[] = [
+export const activeHealthPropertyKeys: HealthPropertyKeys[] = [
   'access2',
   'casthma',
   'cancer',
@@ -124,7 +133,20 @@ export const activeKeys: HealthPropertyKeys[] = [
   'rent_burden',
 ];
 
-export const dataTextMap: Partial<Record<HealthPropertyKeys, string[]>> = {
+export const titleViKeys: TitleViPropertyKeys[] = [
+  'd',
+  'em',
+  'f',
+  'fb',
+  'le',
+  'li',
+  'oa',
+  'rm',
+  'y',
+]
+
+
+export const dataTextMap: Partial<Record<IndicatorKeys, string[]>> = {
   access2: [
     '**%s** of adults in %s do not have health insurance.',
     'This census tract falls within the **%s percentile** of the region, indicating that there are more uninsured adults in %s than there are in %s of tracts in the DVRPC region.',
@@ -185,9 +207,45 @@ export const dataTextMap: Partial<Record<HealthPropertyKeys, string[]>> = {
     '**%s** of renters in %s spend 30% or more of their household income on housing costs.',
     'This tract falls within the **%s percentile** of the region, indicating that more house owners in %s experience severe cost burden than in %s of tracts in the DVRPC region. ',
   ],
+  d: [
+    '**%s** of residents in %s indicated that they experience one or more physical and/or mental disabilities.',
+    'This tract falls within the **%s percentile** of the region, indicating that there or more people with disabilities in %s than in %s of tracts in the DVRPC region.'
+  ],
+  em: [
+    '**%s** of residents in %s identify themselves as being of Hispanic, Latino, Spanish, Mexican, Chicano, Cuban, Puerto Rican, or Other Hispanic origin.',
+    'This tract falls within the **%s percentile** of the region, indicating that more people of Hispanic origin live in %s than %s of tracts in the DVRPC region. '
+  ],
+  f: [
+    '**%s** of residents in %s identify as female.',
+    'This tract falls within the **%s percentile** of the region, indicating that there are more females in %s than in %s of tracts in the DVRPC region.'
+  ],
+  fb: [
+    '**%s** of residents in %s indicated they were born outside of the United States in their census form.',
+    'This tract falls within the **%s percentile** of the region, indicating that more residents in %s were born outside of the United States than in %s of tracts in the DVRPC region. '
+  ],
+  le: [
+    '**%s** of residents in %s indicated that they speak English less than “very well”.',
+    'This tract falls within the **%s percentile** of the region, indicating that more people have limited English proficiency in %s than %s of tracts in the DVRPC region. '
+  ],
+  li: [
+    '**%s** of residents in %s have a household income below 200% of the national poverty level.',
+    'This tract falls within the **%s percentile** of the region, indicating that more people are considered low income in%s than %s of tracts in the DVRPC region. '
+  ],
+  oa: [
+    '**%s** of residents in %s are 65 years and older.',
+    'This tract falls within the **%s percentile** of the region, indicating that there are residents aged 65+ in %s than %s of tracts in the DVRPC region. '
+  ],
+  rm: [
+    '**%s** of residents in Census Tract %s self-identified as one or more of the following races in their census form: Black or African American, American Indian, Alaskan Native, Asian Indian, Japanese, Native Hawaiian, Chinese, Korean, Guamanian or Chamorro, Filipino, Vietnamese, Samoan, Other Asian, and/or Other Pacific Islander.',
+    'This tract falls within the **%s percentile** of the region, indicating that there are more People of Color in %s than %s of tracts in the DVRPC region. '
+  ],
+  y: [
+    '**%s** of residents in %s are under 18 years old.',
+    'This tract falls within the **%s percentile** of the region, indicating that there are more youths in %s than %s of tracts in the DVRPC region. '
+  ],
 };
 
-export const descriptionMap: Record<HealthPropertyKeys, string[]> = {
+export const descriptionMap: Record<IndicatorKeys, string[]> = {
   access2: [
     'At its most basic level, health insurance is a way to pay for healthcare. It reduces the financial risks for individuals when medical expenses are incurred. Health insurance coverage enables individuals to better afford preventive care when they are healthy and acute care when they are sick or injured. While insurance alone does not guarantee good health, it plays a critical role in determining whether and when people receive care. Research shows that uninsured adults are less likely to receive preventive services or manage chronic conditions like diabetes, cancer, and heart disease, and uninsured children are less likely to receive appropriate treatment for asthma, immunizations, dental care, and routine well-child visits.',
     'Despite its importance, many people remain uninsured. Most uninsured individuals live in low-income, working families, and nearly two-thirds of uninsured workers are employed by organizations that do not offer health benefits. More than 80 percent of uninsured people are in families earning less than 400 percent of the federal poverty level, with nearly half below 200 percent. Coverage gaps are also more common among adults ages 19–64 and among certain population groups.',
@@ -243,4 +301,13 @@ export const descriptionMap: Record<HealthPropertyKeys, string[]> = {
   teethlost: [],
   unemp: [],
   vision: [],
+  d: [],
+  em: [],
+  f: [],
+  fb: [],
+  le: [],
+  li: [],
+  oa: [],
+  rm: [],
+  y: [],
 };

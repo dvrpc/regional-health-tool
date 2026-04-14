@@ -1,9 +1,9 @@
 import { themeColor } from '@utils';
-import type { HealthPropertyKeys } from '@types';
+import type { HealthPropertyKeys, TitleViPropertyKeys } from '@types';
 import { indicatorPropertyLabelMap } from '@consts';
 
 interface Props {
-  indicator: HealthPropertyKeys;
+  indicator: HealthPropertyKeys | TitleViPropertyKeys;
   value: number;
 }
 
@@ -76,7 +76,7 @@ export default function Indicator(props: Props) {
             fontSize="12"
             fill="#3a3a3a"
           >
-            {`${normalized.toFixed(2)}%`}
+            {`${normalized.toFixed(0)}%`}
           </text>
         </g>
       </svg>

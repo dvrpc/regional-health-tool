@@ -7,11 +7,13 @@ import type {
 // Health Data Types
 
 export type CompareMode = 'Region' | 'County';
+
 export type AllProperties = HealthDataProperties & {
-  geoid: number;
-  objectid: number;
+
 };
 export interface HealthDataProperties {
+  geoid: number;
+  objectid: number;
   access2_pct_cty: number;
   access2_pct_reg: number;
   access2_pct_st: number;
@@ -198,6 +200,93 @@ export interface HealthDataProperties {
   vision_prv: number;
 }
 
+export interface TitleVIProperties {
+  co_name: string;
+  comp_score: number;
+  county_fips: string;
+  d_class: string;
+  d_est: number;
+  d_est_moe: number;
+  d_pct: number;
+  d_pct_moe: number;
+  d_pctile: number;
+  d_score: number;
+  em_class: string;
+  em_est: number;
+  em_est_moe: number;
+  em_pct: number;
+  em_pct_moe: number;
+  em_pctile: number;
+  em_score: number;
+  f_class: string;
+  f_est: number;
+  f_est_moe: number;
+  f_pct: number;
+  f_pct_moe: number;
+  f_pctile: number;
+  f_score: number;
+  fb_class: string;
+  fb_est: number;
+  fb_est_moe: number;
+  fb_pct: number;
+  fb_pct_moe: number;
+  fb_pctile: number;
+  fb_score: number;
+  geoid: string;
+  le_class: string;
+  le_est: number;
+  le_est_moe: number;
+  le_pct: number;
+  le_pct_moe: number;
+  le_pctile: number;
+  le_score: number;
+  li_class: string;
+  li_est: number;
+  li_est_moe: number;
+  li_pct: number;
+  li_pct_moe: number;
+  li_pctile: number;
+  li_score: number;
+  mcdgeo1: string;
+  mcdgeo2: string;
+  mcdgeo3: string;
+  mun1: string;
+  mun2: string;
+  mun3: string;
+  name: string;
+  oa_class: string;
+  oa_est: number;
+  oa_est_moe: number;
+  oa_pct: number;
+  oa_pct_moe: number;
+  oa_pctile: number;
+  oa_score: number;
+  objectid: number;
+  ref_geom: string;
+  rm_class: string;
+  rm_est: number;
+  rm_est_moe: number;
+  rm_pct: number;
+  rm_pct_moe: number;
+  rm_pctile: number;
+  rm_score: number;
+  state: string;
+  t6_class: string;
+  t6_score: number;
+  tot_pop: number;
+  tot_pop_moe: number;
+  y_class: string;
+  y_est: number;
+  y_est_moe: number;
+  y_pct: number;
+  y_pct_moe: number;
+  y_pctile: number;
+  y_score: number;
+  year: number;
+}
+
+export type IndicatorKeys = HealthPropertyKeys | TitleViPropertyKeys
+
 export type HealthPropertyKeys =
   | 'access2'
   | 'arthritis'
@@ -245,6 +334,19 @@ export type HealthPropertyKeys =
   | 'teethlost'
   | 'unemp'
   | 'vision';
+
+export type TitleViPropertyKeys =
+  'd'
+  | 'em'
+  | 'f'
+  | 'fb'
+  | 'le'
+  | 'li'
+  | 'oa'
+  | 'rm'
+  | 'y'
+
+
 export type HealthSuffix = '_pct_cty' | '_pct_reg' | '_pct_st' | '_prv';
 export type CompareModes = 'cty' | 'reg' | 'st';
 // Map Types

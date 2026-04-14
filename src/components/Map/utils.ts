@@ -1,4 +1,4 @@
-import type { HealthPropertyKeys, HealthSuffix } from '@types';
+import type { IndicatorKeys } from '@types';
 import { themeColor } from '@utils';
 import mapboxgl, { type DataDrivenPropertyValueSpecification } from 'mapbox-gl';
 
@@ -76,7 +76,7 @@ export function decodeBoundsToString(encoded: string): string | null {
   }
 }
 
-export const buildFillColor = (indicator: HealthPropertyKeys, suffix: HealthSuffix): DataDrivenPropertyValueSpecification<string> => [
+export const buildFillColor = (indicator: IndicatorKeys, suffix: string): DataDrivenPropertyValueSpecification<string> => [
   'step',
   ['get', `${indicator}${suffix}`],
   themeColor('--color-well-below-average'),
