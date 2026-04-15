@@ -37,6 +37,7 @@ export default function Indicator(props: Props) {
         width={width}
         height={height}
         aria-label={`Percentile ${percentile}%`}
+        className="shrink-0"
       >
         <style>
           {`

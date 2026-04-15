@@ -76,7 +76,10 @@ export function decodeBoundsToString(encoded: string): string | null {
   }
 }
 
-export const buildFillColor = (indicator: IndicatorKeys, suffix: string): DataDrivenPropertyValueSpecification<string> => [
+export const buildFillColor = (
+  indicator: IndicatorKeys,
+  suffix: string
+): DataDrivenPropertyValueSpecification<string> => [
   'step',
   ['get', `${indicator}${suffix}`],
   themeColor('--color-well-below-average'),
@@ -88,4 +91,14 @@ export const buildFillColor = (indicator: IndicatorKeys, suffix: string): DataDr
   themeColor('--color-above-average'),
   0.8,
   themeColor('--color-well-above-average'),
+];
+
+export const buildFillOpacity = (
+  indicator: IndicatorKeys,
+  suffix: string
+): DataDrivenPropertyValueSpecification<number> => [
+  'case',
+  ['!=', ['get', `${indicator}${suffix}`], null],
+  0.75,
+  0,
 ];
