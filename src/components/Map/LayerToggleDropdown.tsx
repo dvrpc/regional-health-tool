@@ -30,18 +30,18 @@ export default function LayerToggleDropdown({ onToggle }: LayerToggleDropdownPro
     }
 
     return (
-        <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-1">
+        <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-1">
             <button
                 onClick={() => setOpen(o => !o)}
                 title="Toggle layers"
-                className="flex items-center justify-center p-1.5 rounded bg-white border border-gray-300 text-gray-600 shadow-md hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center p-1.5 rounded bg-white border border-dvrpc-gray-6  shadow-md hover:bg-dvrpc-gray-7 transition-colors"
             >
                 <Layers size={18} />
             </button>
 
             {open && (
-                <div className="bg-white border border-gray-300 rounded shadow-xl min-w-44 py-2">
-                    <p className="text-[10px] font-semibold tracking-widest uppercase text-gray-400 px-3 pb-1.5">
+                <div className="bg-white border border-dvrpc-gray-6 rounded shadow-xl min-w-44 py-2">
+                    <p className="text-[10px] font-semibold tracking-widest uppercase text-dvrpc-gray-1 px-3 pb-1.5">
                         Layers
                     </p>
                     {LAYERS.map(({ label, ids, color }) => {
@@ -55,7 +55,7 @@ export default function LayerToggleDropdown({ onToggle }: LayerToggleDropdownPro
                                     className="w-3 h-0.5 rounded-sm flex-shrink-0 transition-colors"
                                     style={{ background: isOn ? color : '#d1d5db' }}
                                 />
-                                <span className={`flex-1 text-[13px] transition-colors ${isOn ? 'text-gray-800' : 'text-gray-400'}`}>
+                                <span className={`flex-1 text-[13px] transition-colors ${isOn ? 'text-dvrpc-gray-1' : 'text-dvrpc-gray-3'}`}>
                                     {label}
                                 </span>
                                 <input

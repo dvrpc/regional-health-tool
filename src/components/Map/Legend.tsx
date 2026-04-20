@@ -10,7 +10,7 @@ interface Props {
 export default function Legend(props: Props) {
   const { indicatorLabel, compareMode, county } = props;
   return (
-    <div className="mt-2 absolute right-2 bottom-6 p-4 z-10 bg-white shadow rounded-md text-[1rem] flex flex-col gap-2">
+    <div className="mt-2 absolute right-2 bottom-2 p-4 z-10 bg-white shadow rounded-md text-[1rem] flex flex-col gap-2">
       <div>
         <h2 className="font-bold text-lg p-0">{indicatorLabel}</h2>
         <span>{`Compared to ${compareMode == 'Region' ? 'DVRPC Region' : `${county} County`}`}</span>
