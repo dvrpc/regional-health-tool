@@ -1,5 +1,5 @@
 import type { LayerMap } from '@types';
-import { buildFillColor } from './utils';
+import { buildFillColor, buildFillOpacity } from './utils';
 // import { themeColor } from '@utils';
 
 const baseLayers: LayerMap = {
@@ -33,8 +33,8 @@ const baseLayers: LayerMap = {
     'source-layer': 'regional_health_indicators',
     paint: {
       'fill-color': buildFillColor('access2', '_pct_reg'),
-      'fill-opacity': 0.75,
-    }
+      'fill-opacity': buildFillOpacity('access2', '_pct_reg'),
+    },
   },
   titleViIndicators: {
     id: 'titlevi-indicators',
@@ -44,7 +44,7 @@ const baseLayers: LayerMap = {
     paint: {
       'fill-color': '#fff',
       'fill-opacity': 0,
-    }
+    },
   },
   circuitTrails: {
     id: 'circuittrails',

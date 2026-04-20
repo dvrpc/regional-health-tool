@@ -21,16 +21,19 @@ import {
   INITIAL_BOUNDS,
 } from '@consts';
 import { baseLayers } from './mapLayers';
-import { buildFillColor } from './utils';
 import type { LayerKey } from './LayerToggleDropdown';
 import LayerToggleDropdown from './LayerToggleDropdown';
+import { buildFillColor, buildFillOpacity } from './utils';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN as string;
 
 const geocoder = new MapboxGeocoder({
   accessToken: mapboxgl.accessToken,
   placeholder: 'Search to location',
-  bbox: [-76.09405517578125, 39.49211914385648, -74.32525634765625, 40.614734298694216],
+  bbox: [
+    -76.09405517578125, 39.49211914385648, -74.32525634765625,
+    40.614734298694216,
+  ],
   marker: false,
 });
 
@@ -39,8 +42,12 @@ interface Props {
   selectedIndicator: IndicatorKeys;
   compareMode: CompareMode;
   setSelectedIndicator: React.Dispatch<React.SetStateAction<IndicatorKeys>>;
-  setSelectedTitleViProperties: React.Dispatch<React.SetStateAction<TitleVIProperties>>;
-  setSelectedHealthProperties: React.Dispatch<React.SetStateAction<HealthDataProperties>>;
+  setSelectedTitleViProperties: React.Dispatch<
+    React.SetStateAction<TitleVIProperties>
+  >;
+  setSelectedHealthProperties: React.Dispatch<
+    React.SetStateAction<HealthDataProperties>
+  >;
 }
 
 export default function MapboxMap({
@@ -60,13 +67,20 @@ export default function MapboxMap({
   const fips = String(selectedProperties.geoid).substring(0, 5);
   const countyName = countyFipsMap[fips as keyof typeof countyFipsMap];
 
-  useEffect(() => { compareModeRef.current = compareMode; }, [compareMode]);
-  useEffect(() => { fipsRef.current = fips; }, [fips]);
-
+  useEffect(() => {
+    compareModeRef.current = compareMode;
+  }, [compareMode]);
+  useEffect(() => {
+    fipsRef.current = fips;
+  }, [fips]);
 
   const setFeatureState = (id: string, state: Record<string, boolean>) => {
     mapRef.current?.setFeatureState(
-      { source: 'healthIndicators', sourceLayer: 'regional_health_indicators', id },
+      {
+        source: 'healthIndicators',
+        sourceLayer: 'regional_health_indicators',
+        id,
+      },
       state
     );
   };
@@ -86,11 +100,11 @@ export default function MapboxMap({
     if (bounds) mapRef.current?.fitBounds(bounds, { padding: 50 });
   };
 
-
   const handleMouseMove = (e: MouseEvent) => {
     if (!e.features || !mapRef.current) return;
     mapRef.current.getCanvas().style.cursor = 'pointer';
-    if (hoverIdRef.current) setFeatureState(hoverIdRef.current, { hover: false });
+    if (hoverIdRef.current)
+      setFeatureState(hoverIdRef.current, { hover: false });
     const id = String(e.features[0].id);
     hoverIdRef.current = id;
     setFeatureState(id, { hover: true });
@@ -99,7 +113,8 @@ export default function MapboxMap({
   const handleMouseLeave = () => {
     if (!mapRef.current) return;
     mapRef.current.getCanvas().style.cursor = '';
-    if (hoverIdRef.current) setFeatureState(hoverIdRef.current, { hover: false });
+    if (hoverIdRef.current)
+      setFeatureState(hoverIdRef.current, { hover: false });
     hoverIdRef.current = null;
   };
 
@@ -107,10 +122,22 @@ export default function MapboxMap({
     if (!mapRef.current || !e.features) return;
     clearSelection();
 
+    // console.log(e.features[0]);
     const id = String(e.features[0].id);
     selectIdRef.current = id;
-    setSelectedTitleViProperties(e.features[0].properties as TitleVIProperties);
-    setSelectedHealthProperties(e.features[1].properties as HealthDataProperties);
+
+    if (e.features.length == 1 && e.features[0].source == 'healthIndicators') {
+      setSelectedTitleViProperties({} as TitleVIProperties);
+    }
+
+    e.features.forEach((feature) => {
+      if (feature.source == 'healthIndicators') {
+        setSelectedHealthProperties(feature.properties as HealthDataProperties);
+      } else {
+        setSelectedTitleViProperties(feature.properties as TitleVIProperties);
+      }
+    });
+
     setFeatureState(id, { selected: true });
 
     if (compareModeRef.current === 'County') {
@@ -153,7 +180,6 @@ export default function MapboxMap({
     return () => map.remove();
   }, []);
 
-
   useEffect(() => {
     const map = mapRef.current;
     if (!map?.isStyleLoaded()) return;
@@ -164,24 +190,39 @@ export default function MapboxMap({
     const healthSuffix: HealthSuffix = isCountyMode ? '_pct_cty' : '_pct_reg';
     const healthOpacity: DataDrivenPropertyValueSpecification<number> =
       !isTitleVI && isCountyMode
-        ? ['case', ['==', ['slice', ['get', 'geoid'], 0, 5], fips], 0.75, 0]
+        ? [
+          'case',
+          ['==', ['slice', ['get', 'geoid'], 0, 5], fips],
+          buildFillOpacity(selectedIndicator, healthSuffix),
+          0,
+        ]
         : !isTitleVI
-          ? 0.75
+          ? buildFillOpacity(selectedIndicator, healthSuffix)
           : 0;
 
-    map.setPaintProperty('health-indicators', 'fill-color',
+    map.setPaintProperty(
+      'health-indicators',
+      'fill-color',
       isTitleVI ? '#fff' : buildFillColor(selectedIndicator, healthSuffix)
     );
     map.setPaintProperty('health-indicators', 'fill-opacity', healthOpacity);
 
-    map.setPaintProperty('titlevi-indicators', 'fill-color',
-      isTitleVI && !isCountyMode ? buildFillColor(selectedIndicator, '_pctile') : '#fff'
+    // TitleVI layer — never shown in County mode
+    map.setPaintProperty(
+      'titlevi-indicators',
+      'fill-color',
+      isTitleVI && !isCountyMode
+        ? buildFillColor(selectedIndicator, '_pctile')
+        : '#fff'
     );
-    map.setPaintProperty('titlevi-indicators', 'fill-opacity',
-      isTitleVI && !isCountyMode ? 0.75 : 0
+    map.setPaintProperty(
+      'titlevi-indicators',
+      'fill-opacity',
+      isTitleVI && !isCountyMode
+        ? buildFillOpacity(selectedIndicator, '_pctile')
+        : 0
     );
   }, [selectedIndicator, compareMode, fips]);
-
 
   useEffect(() => {
     if (compareMode === 'County') {
