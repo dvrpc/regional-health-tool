@@ -22,6 +22,8 @@ import {
 } from '@consts';
 import { baseLayers } from './mapLayers';
 import { buildFillColor } from './utils';
+import type { LayerKey } from './LayerToggleDropdown';
+import LayerToggleDropdown from './LayerToggleDropdown';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN as string;
 
@@ -116,6 +118,13 @@ export default function MapboxMap({
     }
   };
 
+  const handleLayerToggle = (ids: LayerKey[], visible: boolean) => {
+    ids.forEach(id => {
+      mapRef.current?.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none')
+    })
+
+  }
+
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -165,7 +174,6 @@ export default function MapboxMap({
     );
     map.setPaintProperty('health-indicators', 'fill-opacity', healthOpacity);
 
-    // TitleVI layer — never shown in County mode
     map.setPaintProperty('titlevi-indicators', 'fill-color',
       isTitleVI && !isCountyMode ? buildFillColor(selectedIndicator, '_pctile') : '#fff'
     );
@@ -193,6 +201,7 @@ export default function MapboxMap({
         compareMode={compareMode}
         county={countyName}
       />
+      <LayerToggleDropdown onToggle={handleLayerToggle} />
     </div>
   );
 }
