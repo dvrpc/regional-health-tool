@@ -26,57 +26,58 @@ const baseLayers: LayerMap = {
     filter: ['==', 'dvrpc_reg', 'Yes'],
     minzoom: 9,
   },
-  healthIndicators: {
-    id: 'health-indicators',
-    type: 'fill',
-    source: 'healthIndicators',
-    'source-layer': 'regional_health_indicators',
-    paint: {
-      'fill-color': buildFillColor('access2', '_pct_reg'),
-      'fill-opacity': buildFillOpacity('access2', '_pct_reg'),
-    },
-  },
   titleViIndicators: {
-    id: 'titlevi-indicators',
+    id: 'title_vi_indicators_latest',
     type: 'fill',
-    source: 'titleViIndicators',
+    source: 'title_vi_indicators_latest',
     'source-layer': 'title_vi_indicators_latest',
     paint: {
       'fill-color': '#fff',
       'fill-opacity': 0,
     },
   },
+  healthIndicators: {
+    id: 'regional_health_indicators',
+    type: 'fill',
+    source: 'regional_health_indicators',
+    'source-layer': 'regional_health_indicators',
+    paint: {
+      'fill-color': buildFillColor('access2', '_pct_reg'),
+      'fill-opacity': buildFillOpacity('access2', '_pct_reg'),
+    },
+  },
+
   circuitTrails: {
     id: 'circuittrails',
     type: 'line',
     source: 'circuittrails',
     'source-layer': 'circuittrails',
     paint: {
-      'line-color': ["case",
-        ["boolean", ["feature-state", "hover"], false],
-        "#ff0000",
-        ["boolean", ["feature-state", "selected"], false],
-        "#ff0000", [
-          "match",
-          [
-            "get",
-            "circuit"
-          ],
-          "Existing",
-          "#8EC73D",
-          "In Progress",
-          "#FDAE61",
-          "Pipeline",
-          "#B144A5",
-          "Planned",
-          "#2E9BA8",
-          "#0078AE"
-        ]],
-      "line-width": ["step", ["zoom"], 2, 10, 3, 13, 4],
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        '#ff0000',
+        ['boolean', ['feature-state', 'selected'], false],
+        '#ff0000',
+        [
+          'match',
+          ['get', 'circuit'],
+          'Existing',
+          '#8EC73D',
+          'In Progress',
+          '#FDAE61',
+          'Pipeline',
+          '#B144A5',
+          'Planned',
+          '#2E9BA8',
+          '#0078AE',
+        ],
+      ],
+      'line-width': ['step', ['zoom'], 2, 10, 3, 13, 4],
     },
     layout: {
-      visibility: 'none'
-    }
+      visibility: 'none',
+    },
   },
 
   passengerRail: {
@@ -85,7 +86,14 @@ const baseLayers: LayerMap = {
     source: 'passengerrail',
     'source-layer': 'passengerrail',
     paint: {
-      'line-color': '#C61EF7',
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        '#ff0000',
+        ['boolean', ['feature-state', 'selected'], false],
+        '#ff0000',
+        '#C61EF7',
+      ],
       // 'line-color':
       //   [
       //     "match",
@@ -109,12 +117,12 @@ const baseLayers: LayerMap = {
       //     '#003C5A',
       //     '#000000'
       //   ],
-      "line-width": ["step", ["zoom"], 2, 10, 3, 13, 4],
-      "line-blur": 0
+      'line-width': ['step', ['zoom'], 2, 10, 3, 13, 4],
+      'line-blur': 0,
     },
     layout: {
-      visibility: 'none'
-    }
+      visibility: 'none',
+    },
   },
   passengerRailStations: {
     id: 'passengerrailstations',
@@ -123,18 +131,49 @@ const baseLayers: LayerMap = {
     'source-layer': 'passengerrailstations',
     paint: {
       'circle-color': '#FF73DF',
-      'circle-radius': {
-        base: 9,
-        stops: [
-          [10, 3],
-          [13, 4],
-          [15, 5],
+      'circle-stroke-color': '#C557E6',
+      'circle-stroke-width': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        2,
+        ['boolean', ['feature-state', 'selected'], false],
+        2,
+        0.5,
+      ],
+      'circle-radius': [
+        'step',
+        ['zoom'],
+        [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          5,
+          ['boolean', ['feature-state', 'selected'], false],
+          5,
+          3,
         ],
-      },
+        10,
+        [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          7,
+          ['boolean', ['feature-state', 'selected'], false],
+          7,
+          4,
+        ],
+        13,
+        [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          9,
+          ['boolean', ['feature-state', 'selected'], false],
+          9,
+          5,
+        ],
+      ],
     },
     layout: {
-      visibility: 'none'
-    }
+      visibility: 'none',
+    },
   },
   septaBusRoutes: {
     id: 'septa_transitroutes',
@@ -142,18 +181,19 @@ const baseLayers: LayerMap = {
     source: 'septa_transitroutes',
     'source-layer': 'septa_transitroutes',
     paint: {
-      'line-color': ["case",
-        ["boolean", ["feature-state", "hover"], false],
-        "#ff0000",
-        ["boolean", ["feature-state", "selected"], false],
-        "#ff0000",
-        '#FC9530'
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        '#ff0000',
+        ['boolean', ['feature-state', 'selected'], false],
+        '#ff0000',
+        '#FC9530',
       ],
-      "line-width": ["step", ["zoom"], 2, 10, 3, 13, 4],
+      'line-width': ['step', ['zoom'], 2, 10, 3, 13, 4],
     },
     layout: {
-      visibility: 'none'
-    }
+      visibility: 'none',
+    },
   },
   njtBusRoutes: {
     id: 'njtransit_transitroutes',
@@ -161,18 +201,19 @@ const baseLayers: LayerMap = {
     source: 'njtransit_transitroutes',
     'source-layer': 'njtransit_transitroutes',
     paint: {
-      'line-color': ["case",
-        ["boolean", ["feature-state", "hover"], false],
-        "#ff0000",
-        ["boolean", ["feature-state", "selected"], false],
-        "#ff0000",
-        '#ECEE81'
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        '#ff0000',
+        ['boolean', ['feature-state', 'selected'], false],
+        '#ff0000',
+        '#ECEE81',
       ],
-      "line-width": ["step", ["zoom"], 2, 10, 3, 13, 4],
+      'line-width': ['step', ['zoom'], 2, 10, 3, 13, 4],
     },
     layout: {
-      visibility: 'none'
-    }
+      visibility: 'none',
+    },
   },
   paRHIN: {
     id: 'crash_pa_rhin',
@@ -180,18 +221,19 @@ const baseLayers: LayerMap = {
     source: 'crash_pa_rhin',
     'source-layer': 'crash_pa_rhin',
     paint: {
-      'line-color': ["case",
-        ["boolean", ["feature-state", "hover"], false],
-        "#ff0000",
-        ["boolean", ["feature-state", "selected"], false],
-        "#ff0000",
-        '#E94F3D'
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        '#ff0000',
+        ['boolean', ['feature-state', 'selected'], false],
+        '#ff0000',
+        '#E94F3D',
       ],
-      "line-width": ["step", ["zoom"], 2, 10, 3, 13, 4],
+      'line-width': ['step', ['zoom'], 2, 10, 3, 13, 4],
     },
     layout: {
-      visibility: 'none'
-    }
+      visibility: 'none',
+    },
   },
   njRHIN: {
     id: 'crash_nj_rhin',
@@ -199,18 +241,19 @@ const baseLayers: LayerMap = {
     source: 'crash_nj_rhin',
     'source-layer': 'crash_nj_rhin',
     paint: {
-      'line-color': ["case",
-        ["boolean", ["feature-state", "hover"], false],
-        "#ff0000",
-        ["boolean", ["feature-state", "selected"], false],
-        "#ff0000",
-        '#E94F3D'
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        '#ff0000',
+        ['boolean', ['feature-state', 'selected'], false],
+        '#ff0000',
+        '#E94F3D',
       ],
-      "line-width": ["step", ["zoom"], 2, 10, 3, 13, 4],
+      'line-width': ['step', ['zoom'], 2, 10, 3, 13, 4],
     },
     layout: {
-      visibility: 'none'
-    }
+      visibility: 'none',
+    },
   },
   phillyRHIN: {
     id: 'philly_highinjurynetwork',
@@ -218,23 +261,24 @@ const baseLayers: LayerMap = {
     source: 'philly_highinjurynetwork',
     'source-layer': 'philly_highinjurynetwork',
     paint: {
-      'line-color': ["case",
-        ["boolean", ["feature-state", "hover"], false],
-        "#ff0000",
-        ["boolean", ["feature-state", "selected"], false],
-        "#ff0000",
-        '#E94F3D'
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        '#ff0000',
+        ['boolean', ['feature-state', 'selected'], false],
+        '#ff0000',
+        '#E94F3D',
       ],
-      "line-width": ["step", ["zoom"], 2, 10, 3, 13, 4],
+      'line-width': ['step', ['zoom'], 2, 10, 3, 13, 4],
     },
     layout: {
-      visibility: 'none'
-    }
+      visibility: 'none',
+    },
   },
   tractOutline: {
     id: 'tract-outline',
     type: 'line',
-    source: 'healthIndicators',
+    source: 'regional_health_indicators',
     'source-layer': 'regional_health_indicators',
     paint: {
       'line-color': '#ff0000',
@@ -248,7 +292,6 @@ const baseLayers: LayerMap = {
       ],
     },
   },
-
-}
+};
 
 export { baseLayers };

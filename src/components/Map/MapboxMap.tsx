@@ -23,7 +23,9 @@ import {
 import { baseLayers } from './mapLayers';
 import type { LayerKey } from './LayerToggleDropdown';
 import LayerToggleDropdown from './LayerToggleDropdown';
-import { buildFillColor, buildFillOpacity } from './utils';
+import { buildFillColor, buildFillOpacity, zoomToFeatureExtent } from './utils';
+import { MapPopup } from './MapPopup';
+import { createRoot } from 'react-dom/client';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN as string;
 
@@ -50,6 +52,23 @@ interface Props {
   >;
 }
 
+const hoverLayers = [
+  'regional_health_indicators',
+  'circuittrails',
+  'passengerrail',
+  'septa_transitroutes',
+  'njtransit_transitroutes',
+  'crash_pa_rhin',
+  'crash_nj_rhin',
+  'philly_highinjurynetwork',
+  'passengerrailstations',
+];
+
+type FeatureState = {
+  id: string;
+  source: string;
+};
+
 export default function MapboxMap({
   selectedIndicator,
   compareMode,
@@ -58,8 +77,8 @@ export default function MapboxMap({
   setSelectedTitleViProperties,
 }: Props) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const hoverIdRef = useRef<string | null>(null);
-  const selectIdRef = useRef<string | null>(null);
+  const hoverRef = useRef<FeatureState | null>(null);
+  const selectRef = useRef<FeatureState | null>(null);
 
   const compareModeRef = useRef(compareMode);
   const fipsRef = useRef('');
@@ -74,11 +93,15 @@ export default function MapboxMap({
     fipsRef.current = fips;
   }, [fips]);
 
-  const setFeatureState = (id: string, state: Record<string, boolean>) => {
+  const setFeatureState = (
+    id: string,
+    source: string,
+    state: Record<string, boolean>
+  ) => {
     mapRef.current?.setFeatureState(
       {
-        source: 'healthIndicators',
-        sourceLayer: 'regional_health_indicators',
+        source,
+        sourceLayer: source,
         id,
       },
       state
@@ -86,10 +109,10 @@ export default function MapboxMap({
   };
 
   const clearSelection = () => {
-    if (!mapRef.current || !selectIdRef.current) return;
+    if (!mapRef.current || !selectRef.current) return;
     mapRef.current.removeFeatureState({
-      source: 'healthIndicators',
-      sourceLayer: 'regional_health_indicators',
+      source: selectRef.current.source,
+      sourceLayer: selectRef.current.source,
     });
   };
 
@@ -103,42 +126,85 @@ export default function MapboxMap({
   const handleMouseMove = (e: MouseEvent) => {
     if (!e.features || !mapRef.current) return;
     mapRef.current.getCanvas().style.cursor = 'pointer';
-    if (hoverIdRef.current)
-      setFeatureState(hoverIdRef.current, { hover: false });
+    if (hoverRef.current)
+      setFeatureState(hoverRef.current.id, hoverRef.current.source, {
+        hover: false,
+      });
     const id = String(e.features[0].id);
-    hoverIdRef.current = id;
-    setFeatureState(id, { hover: true });
+
+    const source = e.features[0].source + '';
+    hoverRef.current = { id, source };
+    setFeatureState(id, source, { hover: true });
   };
 
   const handleMouseLeave = () => {
     if (!mapRef.current) return;
     mapRef.current.getCanvas().style.cursor = '';
-    if (hoverIdRef.current)
-      setFeatureState(hoverIdRef.current, { hover: false });
-    hoverIdRef.current = null;
+    if (hoverRef.current)
+      setFeatureState(hoverRef.current.id, hoverRef.current.source, {
+        hover: false,
+      });
+    hoverRef.current = null;
   };
 
   const handleClick = (e: MouseEvent) => {
     if (!mapRef.current || !e.features) return;
     clearSelection();
 
-    // console.log(e.features[0]);
     const id = String(e.features[0].id);
-    selectIdRef.current = id;
+    const source = e.features[0].source + '';
+    selectRef.current = { id, source };
 
-    if (e.features.length == 1 && e.features[0].source == 'healthIndicators') {
+    if (
+      e.features.length == 1 &&
+      e.features[0].source == 'regional_health_indicators'
+    ) {
       setSelectedTitleViProperties({} as TitleVIProperties);
     }
 
-    e.features.forEach((feature) => {
-      if (feature.source == 'healthIndicators') {
-        setSelectedHealthProperties(feature.properties as HealthDataProperties);
-      } else {
-        setSelectedTitleViProperties(feature.properties as TitleVIProperties);
-      }
-    });
+    if (
+      source == 'regional_health_indicators' ||
+      source == 'title_vi_indicators_latest'
+    ) {
+      e.features.forEach((feature) => {
+        if (feature.source == 'regional_health_indicators') {
+          setSelectedHealthProperties(
+            feature.properties as HealthDataProperties
+          );
+        } else if (feature.source == 'title_vi_indicators_latest') {
+          setSelectedTitleViProperties(feature.properties as TitleVIProperties);
+        }
+      });
+    } else {
+      const feature = e.features[0];
+      const properties = feature.properties ?? {};
 
-    setFeatureState(id, { selected: true });
+      const container = document.createElement('div');
+
+      const popup = new mapboxgl.Popup({
+        maxWidth: '320px',
+        anchor: 'left',
+        closeButton: false, // we handle it ourselves
+      })
+        .setLngLat(e.lngLat)
+        .setDOMContent(container)
+        .addTo(mapRef.current!);
+
+      const root = createRoot(container);
+
+      root.render(
+        <MapPopup
+          properties={properties}
+          onClose={() => popup.remove()}
+          onZoom={() => {
+            if (!feature.geometry || !mapRef.current) return;
+            zoomToFeatureExtent(mapRef.current, feature.geometry);
+          }}
+        />
+      );
+    }
+
+    setFeatureState(id, source, { selected: true });
 
     if (compareModeRef.current === 'County') {
       fitCounty(String(id).substring(0, 5));
@@ -146,12 +212,14 @@ export default function MapboxMap({
   };
 
   const handleLayerToggle = (ids: LayerKey[], visible: boolean) => {
-    ids.forEach(id => {
-      mapRef.current?.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none')
-    })
-
-  }
-
+    ids.forEach((id) => {
+      mapRef.current?.setLayoutProperty(
+        id,
+        'visibility',
+        visible ? 'visible' : 'none'
+      );
+    });
+  };
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -173,9 +241,13 @@ export default function MapboxMap({
       Object.values(baseLayers).forEach((layer) => map.addLayer(layer));
     });
 
-    map.on('mousemove', ['health-indicators'], handleMouseMove);
-    map.on('mouseleave', ['health-indicators'], handleMouseLeave);
-    map.on('click', ['health-indicators', 'titlevi-indicators'], handleClick);
+    map.on('mousemove', hoverLayers, handleMouseMove);
+    map.on('mouseleave', hoverLayers, handleMouseLeave);
+    map.on(
+      'click',
+      ['title_vi_indicators_latest', ...hoverLayers],
+      handleClick
+    );
 
     return () => map.remove();
   }, []);
@@ -191,32 +263,36 @@ export default function MapboxMap({
     const healthOpacity: DataDrivenPropertyValueSpecification<number> =
       !isTitleVI && isCountyMode
         ? [
-          'case',
-          ['==', ['slice', ['get', 'geoid'], 0, 5], fips],
-          buildFillOpacity(selectedIndicator, healthSuffix),
-          0,
-        ]
+            'case',
+            ['==', ['slice', ['get', 'geoid'], 0, 5], fips],
+            buildFillOpacity(selectedIndicator, healthSuffix),
+            0,
+          ]
         : !isTitleVI
           ? buildFillOpacity(selectedIndicator, healthSuffix)
           : 0;
 
     map.setPaintProperty(
-      'health-indicators',
+      'regional_health_indicators',
       'fill-color',
       isTitleVI ? '#fff' : buildFillColor(selectedIndicator, healthSuffix)
     );
-    map.setPaintProperty('health-indicators', 'fill-opacity', healthOpacity);
+    map.setPaintProperty(
+      'regional_health_indicators',
+      'fill-opacity',
+      healthOpacity
+    );
 
     // TitleVI layer — never shown in County mode
     map.setPaintProperty(
-      'titlevi-indicators',
+      'title_vi_indicators_latest',
       'fill-color',
       isTitleVI && !isCountyMode
         ? buildFillColor(selectedIndicator, '_pctile')
         : '#fff'
     );
     map.setPaintProperty(
-      'titlevi-indicators',
+      'title_vi_indicators_latest',
       'fill-opacity',
       isTitleVI && !isCountyMode
         ? buildFillOpacity(selectedIndicator, '_pctile')

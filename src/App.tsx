@@ -11,12 +11,10 @@ import {
 import { useState } from 'react';
 
 function App() {
-  const [selectedHealthProperties, setSelectedHealthProperties] = useState<HealthDataProperties>(
-    {} as HealthDataProperties
-  );
-  const [selectedTitleViProperties, setSelectedTitleViProperties] = useState<TitleVIProperties>(
-    {} as TitleVIProperties
-  )
+  const [selectedHealthProperties, setSelectedHealthProperties] =
+    useState<HealthDataProperties>({} as HealthDataProperties);
+  const [selectedTitleViProperties, setSelectedTitleViProperties] =
+    useState<TitleVIProperties>({} as TitleVIProperties);
   const [selectedIndicator, setSelectedIndicator] =
     useState<IndicatorKeys>('access2');
   const [compareMode, setCompareMode] = useState<CompareMode>('Region');

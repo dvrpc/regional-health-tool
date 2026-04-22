@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #ffffff;
@@ -65,4 +65,14 @@ body {
 
 .mapboxgl-map {
   color: var(--color-dvrpc-gray-1) !important;
+}
+
+.mapboxgl-popup-close-button {
+  visibility: hidden !important;
+}
+
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
 }

@@ -102,3 +102,68 @@ export const buildFillOpacity = (
   0.75,
   0,
 ];
+
+export function zoomToFeatureExtent(
+  map: mapboxgl.Map,
+  geometry: GeoJSON.Geometry
+): void {
+  if (!geometry) return;
+
+  if (geometry.type === 'Point') {
+    map.flyTo({
+      center: geometry.coordinates as [number, number],
+      zoom: 14,
+    });
+  } else if (geometry.type === 'LineString') {
+    const coordinates = geometry.coordinates as [number, number][];
+    let minLng = coordinates[0][0];
+    let maxLng = coordinates[0][0];
+    let minLat = coordinates[0][1];
+    let maxLat = coordinates[0][1];
+
+    coordinates.forEach(([lng, lat]) => {
+      minLng = Math.min(minLng, lng);
+      maxLng = Math.max(maxLng, lng);
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+    });
+
+    const bounds: [[number, number], [number, number]] = [
+      [minLng, minLat],
+      [maxLng, maxLat],
+    ];
+
+    map.fitBounds(bounds, {
+      padding: 200,
+      maxZoom: 16,
+    });
+  }
+  // else if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+  //   const coords =
+  //     geometry.type === 'Polygon'
+  //       ? geometry.coordinates[0]
+  //       : geometry.coordinates[0][0];
+
+  //   let minLng = coords[0][0];
+  //   let maxLng = coords[0][0];
+  //   let minLat = coords[0][1];
+  //   let maxLat = coords[0][1];
+
+  //   coords.forEach(([lng, lat]: [number, number]) => {
+  //     minLng = Math.min(minLng, lng);
+  //     maxLng = Math.max(maxLng, lng);
+  //     minLat = Math.min(minLat, lat);
+  //     maxLat = Math.max(maxLat, lat);
+  //   });
+
+  //   const bounds: [[number, number], [number, number]] = [
+  //     [minLng, minLat],
+  //     [maxLng, maxLat],
+  //   ];
+
+  //   map.fitBounds(bounds, {
+  //     padding: 50,
+  //     maxZoom: 16,
+  //   });
+  // }
+}

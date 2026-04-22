@@ -19,6 +19,7 @@ import {
   getTitleViIndicatorProps,
 } from '@utils';
 import TitleViIndicatorCard from './TitleVIIndicatorCard';
+// import { MapPin } from 'lucide-react';
 
 interface Props {
   selectedHealthProperties: HealthDataProperties;
@@ -27,6 +28,7 @@ interface Props {
   compareMode: CompareMode;
   setCompareMode: (compareMode: CompareMode) => void;
   setSelectedIndicator: React.Dispatch<React.SetStateAction<IndicatorKeys>>;
+  // zoomToTract: (geoid: string) => void;
 }
 
 const compareOptions: CompareMode[] = ['Region', 'County'];
@@ -41,6 +43,7 @@ export default function ContentPanel(props: Props) {
     setSelectedIndicator,
   } = props;
 
+  // const [pinHovered, setPinHovered] = useState(false);
   const [collapsedIndicators, setCollapsedIndicators] = useState<
     Partial<Record<IndicatorKeys, boolean>>
   >(() => {
@@ -87,8 +90,18 @@ export default function ContentPanel(props: Props) {
 
   return (
     <div>
-      <div className="p-4 border-b border-dvrpc-gray-7">
+      <div className="p-4 border-b border-dvrpc-gray-7 relative">
         <h2 className="text-2xl font-bold ">Census Tract: {tractId}</h2>
+        {/* <button
+          onMouseEnter={() => setPinHovered(true)}
+          onMouseLeave={() => setPinHovered(false)}
+          onClick={() => zoomToTract(geoid)}
+        >
+          <MapPin
+            className="absolute right-4 top-4"
+            color={pinHovered ? '#005475' : '#0078ae'}
+          />
+        </button> */}
         <span className="text-lg">{countyName} County</span>
         <br />
         <p className="mt-2">
